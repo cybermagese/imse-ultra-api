@@ -29,7 +29,7 @@ const api = new Api("10.0.48.94","config","ef56","sv");
 
 api.listIOChannels() //operation
 .then(data=>{
-    console.log("Operation npm result:",data);
+    console.log("Operation result:",data);
 })
 .then(()=>{
     api.logout(); //always logout or you create a lot of sessions
