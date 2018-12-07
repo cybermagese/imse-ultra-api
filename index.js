@@ -70,23 +70,31 @@ const CODE = ['PUT_OK','PUT_PERMISSIONDENIED','PUT_ILLEAGAL_VALUE','PUT_INTERNAL
 /**
  * Api(ip, username, password, language, port and path)
  * all parameters are optional and defaults to factory settings
- * factory ip setting for imse ultra is 10.0.48.94 with username config and password ef56
- * language is sv for swedish and en for english
- * port 443 and path = ""
  */
 class Api {
 
 
-    constructor (host=`10.0.48.94`, username=`config`, password=`ef56`, lang=`sv`, port=443, path=``) {
-        //lang may be 'en' for english or 'sv' for swedish, future releases may have other
+    constructor (host=`10.0.48.94`, username=`config`, password=`ef56`, lang=`sv`, port=`443`, path=``) {
+        if(typeof host === 'object' && arguments.length === 1) {//allow array as one argument 
+            if(host.host) host = host.host;
+            if(host.username) username = host.username;
+            if(host.password) password = host.password;
+            if(host.lane) lang = host.lang;
+            if(host.port) port = host.port;
+            if(host.path) path = host.path;
+        }
+        
         this.host = host;
         this.username= username;
         this.password= password;
         this.path= path;
         this.port= port;
-        this.lang=lang;
+        this.lang= lang; //lang may be 'en' for english or 'sv' for swedish, future releases may have other
         
         this.init();
+
+        // expose the api version
+        this.version = '0.1.4';
     }
 
     init() {
@@ -96,7 +104,13 @@ class Api {
         //constants
         this.loginOK = false;
         this.ALL = -1;
+        /**
+         * Definitions of settings 
+         */
         this.def = DEF;
+        /**
+         * array indexed on Code number for type of error in RESULT of requests
+         */
         this.Code = CODE;
         this.mode = { get:'query', set:'putpar', logout: 'logout' };
 
@@ -159,6 +173,19 @@ class Api {
         }
     }
 
+    /**
+     * send a request to IMSE Ultra 
+     * returns an array {
+     *  {boolean} ok, 
+     *  {boolean} authorized, 
+     *  {string|array|null}data, 
+     *  {https status code} status:res.status, 
+     *  {optional array of error codes} errors: [{Code: {integer},n..}]
+     * }
+     * @param {string} qs query string according to mode
+     * @param {string} mode one of this.mode
+     * 
+     */
     async get(qs,mode=this.mode.get) {
         if(this.loginOK!==true){
             await this.login();
@@ -222,7 +249,7 @@ class Api {
     }
 
 /**
- * Returns error type from code number (0-32)
+ * Returns error type from code number (0-32) see this.CODE
  * @param {integer} code return Code in response.RESULT[n] 
  */
     getCodeType(code) {
@@ -297,6 +324,11 @@ class Api {
     async formatChannel(i,format=this.def.FORMAT.NORMAL,decimals=0,base=0,digits=0,list='',scientific=0) {
         var res = await this.get(`{EDIT SHOWRESDEF(CHANNEL(${i})){Type=${format};Decimals=${decimals};Base=${base};Digits=${digits};${(list===""?"":'List="'+list+'";')}${(format===this.def.FORMAT.FLOAT?"Scientific="+scientific:"")}}}`,this.mode.set);
         return res;
+    }
+
+    async getChannel(i,verbose=false) {
+        var res = await this.get(`CHANNEL{i=${i};AppIndex;Identifier;Type;Name;Unit;Dec;TrueValue;Value;ShowResValue;${(verbose===true?"":"NAME;AppChannelName;Validation;LowLimit;HighLimit;MOAllowed;MOActive;MOValue;MODuration;MOTimer;AccessLevel;WAccess;Flags;MOShowResValue;")}}`);
+        if(res.ok) { return {ok:true, authorized:true, data:res.data.CHANNEL, status:res.status}; }else{ return res; }
     }
 
     async listChannels(appId=this.ALL,type=this.ALL,verbose=false) {

@@ -1,6 +1,6 @@
 {
   "name": "imse-ultra-api",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Api for Abelko's IMSE Ultra family of BAC/BMS/PLC",
   "main": "index.js",
   "scripts": {
@@ -17,5 +17,12 @@
   "repository":{
     "type": "git",
     "url": "git://github.com/cybermagese/imse-ultra-api"
-  }
+  },
+  "keywords": [
+    "imse-ultra","iot"
+  ],
+  "bugs": {
+    "url": "https://github.com/cybermagese/imse-ultra-api/issues"
+  },
+  "homepage": "https://github.com/cybermagese/imse-ultra-api#readme",
 }
