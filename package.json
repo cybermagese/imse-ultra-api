@@ -1,30 +1,28 @@
 {
-  "name": "ioriver-telldus",
-  "version": "0.1.17",
-  "description": "Ioriver plugin for Telldus Local API ",
+  "name": "imse-ultra-api",
+  "version": "0.1.5",
+  "description": "Api for Abelko's IMSE Ultra family of BAC/BMS/PLC",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cybermagese/ioriver-telldus.git"
-  },
-  "engines": {
-    "ioriver": ">=0.1.4",
-    "node": ">=8" 
-  },
-  "keywords": [
-    "ioriver","telldus","iot"
-  ],
   "author": "Ove Jansson <ove@cybermage.se>",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/cybermagese/ioriver-telldus/issues"
+  "engines": {
+    "node": ">=8"
   },
-  "homepage": "https://github.com/cybermagese/ioriver-telldus#readme",
   "dependencies": {
-    "ioriver": "^0.1.4",
-    "telldus-api": "^1.0.1" 
-  }
+    "node-fetch":"^2.3.0" 
+  },
+  "repository":{
+    "type": "git",
+    "url": "git://github.com/cybermagese/imse-ultra-api"
+  },
+  "keywords": [
+    "imse-ultra","iot"
+  ],
+  "bugs": {
+    "url": "https://github.com/cybermagese/imse-ultra-api/issues"
+  },
+  "homepage": "https://github.com/cybermagese/imse-ultra-api#readme"
 }
