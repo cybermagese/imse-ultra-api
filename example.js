@@ -1,10 +1,10 @@
 const {Api} = require('.');
 
-const api = new Api("10.0.48.94","config","ef56","sv");
+const api = new Api({host:"10.0.48.94", username:"config", password:"ef56", lang:"sv"});
 
 api.listIOChannels()
 .then(data=>{
-    console.log("Operation result:",data);
+    console.log("Operation npm result:",data);
 })
 .then(()=>{
     api.logout();

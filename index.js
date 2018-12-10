@@ -68,33 +68,27 @@ const DEF= {
 const CODE = ['PUT_OK','PUT_PERMISSIONDENIED','PUT_ILLEAGAL_VALUE','PUT_INTERNAL_ERROR','PUT_NO_RESOURCE','PUT_ILLEGAL_INDEX','PUT_SYNTAX_ERROR','PUT_MISSING_INITVALUES','PUT_PASSWORD_ERROR','PUT_USERNAME_ERROR','PUT_UNKNOWN_CMD','PUT_UNABLE_TO_RUN','PUT_OUTOFMEM','PUT_MISSING_FIELD','PUT_FILENOTFOUND','PUT_INVALID_FILENAME','PUT_FILEEXISTS','PUT_USERNAME_EXIST','PUT_BLOCKED_BY_BACKUP','PUT_STRING_VALUE_TO_LONG','PUT_IDENTIFIER_EXISTS','PUT_FIELD_IS_READONLY','PUT_NULL_FUNCTION_ERROR','PUT_MODBUS_SLAVE_ACTIVATED','PUT_NOT_BELONG_TO_APPLICATION','PUT_IN_USE_DELETE_DENIED','PUT_ILLEGAL_SETTINGS','PUT_INVALID_FILETYPE','PUT_INVALID_IP_ADDRESS','PUT_BLOCKED_BY_MODBUSMAPPING','PUT_ALREADY_RUNNING','PUT_ALREADY_STOPPED','PUT_PARSE_ERROR'];
 
 /**
- * Api(ip, username, password, language, port and path)
+ * Api({host, username, password, lang, port, path})
  * all parameters are optional and defaults to factory settings
  */
 class Api {
 
 
-    constructor (host=`10.0.48.94`, username=`config`, password=`ef56`, lang=`sv`, port=`443`, path=``) {
-        if(typeof host === 'object' && arguments.length === 1) {//allow array as one argument 
-            if(host.host) host = host.host;
-            if(host.username) username = host.username;
-            if(host.password) password = host.password;
-            if(host.lane) lang = host.lang;
-            if(host.port) port = host.port;
-            if(host.path) path = host.path;
+    constructor (config) {
+        this.host=`10.0.48.94`;
+        this.username=`config`;
+        this.password:`ef56`;
+        this.lang=`sv`;
+        this.port=`443`;
+        this.path=``;
+
+        var fields = [`host`, `username`, `password`, `lang`, `port`, `path`];
+        for(var i=0; i < fields.length; i++) {
+            if(config[fields[i]]) this[fields[i] = config[fields[i]; 
         }
-        
-        this.host = host;
-        this.username= username;
-        this.password= password;
-        this.path= path;
-        this.port= port;
-        this.lang= lang; //lang may be 'en' for english or 'sv' for swedish, future releases may have other
         
         this.init();
 
-        // expose the api version
-        this.version = '0.1.4';
     }
 
     init() {
@@ -168,6 +162,7 @@ class Api {
             //todo log error
         }
         else{
+
             this.saveCookies(res.headers.raw()['set-cookie']);
             this.loginOK= true;
         }

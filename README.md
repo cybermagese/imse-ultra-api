@@ -13,8 +13,8 @@ $ npm install imse-ultra-api
 
 You need the ip of your IMSE Ultra unit and an account on it.
 
-The api constructor takes the following parameters, all optionals with default to factory settings in parentesis and swedish
-* ip ('10.0.48.94')
+The api constructor takes a config argument with the following parameters, all optionals with default to factory settings in parentesis and swedish
+* host ('10.0.48.94')
 * username ('config')
 * password ('ef56') - please change the password
 * lang ('sv') - use 'en' for english
@@ -25,11 +25,11 @@ The api constructor takes the following parameters, all optionals with default t
 ```js
 const {Api} = require('.');
 
-const api = new Api("10.0.48.94","config","ef56","sv");
+const api = new Api({host:"10.0.48.94", username:"config", password:"ef56", lang:"sv"});
 
 api.listIOChannels() //operation
 .then(data=>{
-    console.log("Operation result:",data);
+    console.log("Operation npm result:",data);
 })
 .then(()=>{
     api.logout(); //always logout or you create a lot of sessions
