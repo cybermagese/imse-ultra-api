@@ -77,7 +77,7 @@ class Api {
     constructor (config) {
         this.host=`10.0.48.94`;
         this.username=`config`;
-        this.password:`ef56`;
+        this.password=`ef56`;
         this.lang=`sv`;
         this.port=`443`;
         this.path=``;
