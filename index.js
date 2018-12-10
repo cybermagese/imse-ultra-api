@@ -84,7 +84,7 @@ class Api {
 
         var fields = [`host`, `username`, `password`, `lang`, `port`, `path`];
         for(var i=0; i < fields.length; i++) {
-            if(config[fields[i]]) this[fields[i] = config[fields[i]; 
+            if(config[fields[i]]) this[fields[i]] = config[fields[i]]; 
         }
         
         this.init();
