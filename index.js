@@ -182,6 +182,7 @@ class Api {
      * 
      */
     async get(qs,mode=this.mode.get) {
+        
         if(this.loginOK!==true){
             await this.login();
         }
@@ -190,7 +191,7 @@ class Api {
             const agent = new https.Agent({
                 rejectUnauthorized: false
             });
-            const res = await fetch(`${this.getBaseUrl()}/fcgi/streamer.fcgi?${mode}=${qs}`, {
+            const res = await fetch(encodeURI(`${this.getBaseUrl()}/fcgi/streamer.fcgi?${mode}=${qs}`), {
                 method: "GET",
                 headers: {
                     'User-Agent' : 'imse-ultra-api',
@@ -206,6 +207,7 @@ class Api {
             if(res.ok) {
                 if(mode===this.mode.set){
                     var r= await res.json();
+                    
                     var codeOK = true;
                     if(typeof r.RESULT !== 'undefined') {
                         for(var j=0;j<r.RESULT.length;j++) {
@@ -391,7 +393,7 @@ class Api {
 
     // IOChannel functions
 
-    async createIOChannel(parentIOUnit, name, direction=this.def.IOCHANNEL.OUTPUT, connectionIO=1, extra) {
+    async createIOChannel(parentIOUnit, name, direction=this.def.IOCHANNEL.OUTPUT, connectionIO=1, extra='') {
         var res = await this.get(`{NEW IOCHANNEL{Name="${name}";Direction=${direction};ParentIOUnit=${parentIOUnit};ConnectionIO=${connectionIO};${extra}}}`,this.mode.set);
         return res;
     }
