@@ -115,6 +115,10 @@ class Api {
         return uri;
     }
 
+    getLang() {
+        return this.lang;
+    }
+    
     saveCookies(setcookie) {
         for(var i=0;i<setcookie.length;i++) {
             var d = setcookie[i].split("=");
