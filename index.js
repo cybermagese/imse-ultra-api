@@ -1,3 +1,4 @@
+'use strict';
 const querystring = require('querystring');
 const https = require('https');
 const fetch = require('node-fetch');
@@ -10,7 +11,8 @@ const fetch = require('node-fetch');
  * 
 **/
 
-'use strict';
+const SESSION_LIFETIME_IN_MS = 300000;
+
 
 const DEF= {
     APPLICATION: {
@@ -63,7 +65,7 @@ const DEF= {
         FAILED: 2,
         DISABLED: 3
     }
-}
+};
 
 const CODE = ['PUT_OK','PUT_PERMISSIONDENIED','PUT_ILLEAGAL_VALUE','PUT_INTERNAL_ERROR','PUT_NO_RESOURCE','PUT_ILLEGAL_INDEX','PUT_SYNTAX_ERROR','PUT_MISSING_INITVALUES','PUT_PASSWORD_ERROR','PUT_USERNAME_ERROR','PUT_UNKNOWN_CMD','PUT_UNABLE_TO_RUN','PUT_OUTOFMEM','PUT_MISSING_FIELD','PUT_FILENOTFOUND','PUT_INVALID_FILENAME','PUT_FILEEXISTS','PUT_USERNAME_EXIST','PUT_BLOCKED_BY_BACKUP','PUT_STRING_VALUE_TO_LONG','PUT_IDENTIFIER_EXISTS','PUT_FIELD_IS_READONLY','PUT_NULL_FUNCTION_ERROR','PUT_MODBUS_SLAVE_ACTIVATED','PUT_NOT_BELONG_TO_APPLICATION','PUT_IN_USE_DELETE_DENIED','PUT_ILLEGAL_SETTINGS','PUT_INVALID_FILETYPE','PUT_INVALID_IP_ADDRESS','PUT_BLOCKED_BY_MODBUSMAPPING','PUT_ALREADY_RUNNING','PUT_ALREADY_STOPPED','PUT_PARSE_ERROR'];
 
@@ -81,8 +83,10 @@ class Api {
         this.lang=`sv`;
         this.port=`443`;
         this.path=``;
+        this.timeout=1000; //timeout in milliseconds
+        this.touchtime=0; //last access
 
-        var fields = [`host`, `username`, `password`, `lang`, `port`, `path`];
+        var fields = [`host`, `username`, `password`, `lang`, `port`, `path`, `timeout`];
         for(var i=0; i < fields.length; i++) {
             if(config[fields[i]]) this[fields[i]] = config[fields[i]]; 
         }
@@ -130,8 +134,8 @@ class Api {
                 case 'limitview': this.cookies.limitview = d[1]; break;
                 case 'permission': this.cookies.permission = d[1]; break;
                 default:
-            };
-        };
+            }
+        }
     }
 
     getCookie() {
@@ -164,11 +168,10 @@ class Api {
         if(typeof res=== 'undefined' || res.status!==302) {
             this.loginOK=false;
             //todo log error
-        }
-        else{
-
+        }else{
             this.saveCookies(res.headers.raw()['set-cookie']);
             this.loginOK= true;
+            this.touchtime=Date.now();
         }
     }
 
@@ -187,14 +190,12 @@ class Api {
      */
     async get(qs,mode=this.mode.get) {
         
-        if(this.loginOK!==true){
+        if(this.loginOK!==true || ((this.touchtime-Date.now()>SESSION_LIFETIME_IN_MS))){
             await this.login();
         }
 
         if(this.loginOK) {
-            const agent = new https.Agent({
-                rejectUnauthorized: false
-            });
+            const agent = new https.Agent({ rejectUnauthorized: false });
             const res = await fetch(encodeURI(`${this.getBaseUrl()}/fcgi/streamer.fcgi?${mode}=${qs}`), {
                 method: "GET",
                 headers: {
@@ -209,6 +210,7 @@ class Api {
                 //todo: log error
             });
             if(res.ok) {
+                this.touchtime=Date.now();
                 if(mode===this.mode.set){
                     var r= await res.json();
                     
@@ -227,9 +229,14 @@ class Api {
                 if(mode===this.mode.logout) {
                     return {ok:true, authorized:true, data:null, status:res.status};
                 }
-                return {ok:true, authorized:true, data:await res.json(), status:res.status};
+                var r2 = await res.json();
+                return {ok:true, authorized:true, data: r2, status:res.status};
             }else{
-                return {ok:false, authorized:true, status: await res.status};
+                if(res.status===307) {
+                    this.loginOK= false;
+                    return {ok:false, authorized:false, status:res.status};
+                }
+                return {ok:false, authorized:true, status:res.status};
             }
 
         }else{
@@ -436,6 +443,7 @@ class Api {
 
     async systemInfo(verbose=false) {
         var res = await this.get(`SYSTEM{i>0;ModuleName;ModuleAddress;EpochTime;LocalTime;UtcTime;AlarmCntA;AlarmCntB;AlarmCntAll;EventCnt;NoteChange;ActiveMO;ErrorModeStatus;SWRelease;HWVersion;SerialNumber;Eth0Dhcp;Eth0Mac;Eth0Ip;Eth0Netmask;Eth0Gateway;Eth0StaticIp;Eth0StaticNetmask;Eth0StaticGateway;Dns1;Dns2;Dns3;StatUptime;${(verbose==true?"UseNTP;NTPServer;ProcessId;AlarmEventCnt;AlarmCntAck;EventCntAck;StatLastAppMRunTime;StatAvgAppMRunTime;StatMinAppMRunTime;StatMaxAppMRunTime;StatTLeftAppMRunTime;StatUserCpu;StatNiceCpu;StatSystemCpu;StatIdleCpu;StatIOWaitCpu;StatIrqCpu;StatSoftIrqCpu;StatStealCpu;StatGuestCpu;StatGuestNiceCpu;StatOneMinLoad;StatFiveMinLoad;StatFifteenMinLoad;StatSQLiteMem;StatMemActive;StatMemMainBuffers;StatMemCached;StatMemInactive;StatMemMainFree;StatMemMainTotal;StatProgramUptime;StatRootFsFree;StatRootFsTot;StatUltraFsFree;StatUltraFsTot;StatTmpFsFree;StatTmpFsTot;SWVersionAppUltra;SWVersionAppService;SWVersionKernel;SWVersionKernelUname;SWVersionRescue;SWVersionRootfs;PerBackupPeriod;PerBackupOffset;BackupStatus;RestoreStatus;BackupResult;RestoreResult;FactoryRestored;BackupErrMsg;RestoreErrMsg;TemplateAppIndex;ScriptKeywords;ScriptReserved;StartPageType;StartPageIndex;ScriptFormulaCheck;ShowResDefClipBoard;UploadCounter;SetSessionIP;MailProcStatus;IsRemovingAllMails;QueuedAlarmMails;QueuedLogMails;WAccess;":"")}}`);
+        var r= await res;
         if(res.ok) { return {ok:true, authorized:true, data:res.data.SYSTEM, status:res.status}; }else{ return res; }
     }
     
