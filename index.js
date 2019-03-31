@@ -84,7 +84,7 @@ class Api {
         this.port=`443`;
         this.path=``;
         this.timeout=1000; //timeout in milliseconds
-        this.touchtime=0; //last access
+        this.touchtime=Date.now(); //last access
 
         var fields = [`host`, `username`, `password`, `lang`, `port`, `path`, `timeout`];
         for(var i=0; i < fields.length; i++) {
@@ -190,7 +190,11 @@ class Api {
      */
     async get(qs,mode=this.mode.get) {
         
-        if(this.loginOK!==true || ((this.touchtime-Date.now()>SESSION_LIFETIME_IN_MS))){
+        if(this.loginOK!==true || ((this.touchtime-Date.now())>SESSION_LIFETIME_IN_MS)){
+            if((this.touchtime-Date.now())>SESSION_LIFETIME_IN_MS) {
+                console.log(`Session timeout happened`);
+                await this.logout();
+            }
             await this.login();
         }
 
