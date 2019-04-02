@@ -124,6 +124,7 @@ class Api {
     }
     
     saveCookies(setcookie) {
+        if(typeof setcookie === 'undefined') return;
         for(var i=0;i<setcookie.length;i++) {
             var d = setcookie[i].split("=");
             d[1]= d[1].substring(0,d[1].length-1);

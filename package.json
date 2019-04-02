@@ -1,6 +1,6 @@
 {
   "name": "imse-ultra-api",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Api for Abelko's IMSE Ultra family of BAC/BMS/PLC",
   "main": "index.js",
   "scripts": {
